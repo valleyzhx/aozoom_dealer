@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import { useActionState } from "react"
 import { loginAction } from "@/lib/actions"
 
@@ -28,6 +29,11 @@ export function LoginForm() {
           autoComplete="current-password"
           required
         />
+      </div>
+      <div className="form-row-end">
+        <Link className="auth-link" href="/reset-password">
+          Forgot password?
+        </Link>
       </div>
       <button className="btn btn-primary" type="submit" disabled={isPending}>
         {isPending ? "Signing in" : "Sign In"}

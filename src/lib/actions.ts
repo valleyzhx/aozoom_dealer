@@ -2,6 +2,7 @@
 
 import type { HttpTypes } from "@medusajs/types"
 import { revalidatePath } from "next/cache"
+import { headers } from "next/headers"
 import { redirect } from "next/navigation"
 import { DEFAULT_COUNTRY_CODE, sdk } from "./config"
 import {
@@ -26,6 +27,12 @@ import type { DealerAddress, DealerProfile, DealerSession } from "./types"
 
 export type ActionState = {
   error?: string
+}
+
+export type PasswordResetState = {
+  success?: boolean
+  error?: string
+  email?: string
 }
 
 type DeliveryMethod = "ship" | "pickup" | "route"
@@ -68,6 +75,26 @@ function parseQuantity(value: FormDataEntryValue | null) {
 function getString(formData: FormData, key: string) {
   const value = formData.get(key)
   return typeof value === "string" ? value.trim() : ""
+}
+
+async function getDealerPortalOrigin() {
+  const requestHeaders = await headers()
+  const forwardedHost = requestHeaders.get("x-forwarded-host")
+  const host = forwardedHost || requestHeaders.get("host")
+
+  if (host) {
+    const forwardedProto = requestHeaders.get("x-forwarded-proto")
+    const protocol =
+      forwardedProto || (host.includes("localhost") ? "http" : "https")
+
+    return `${protocol}://${host}`
+  }
+
+  return (
+    process.env.NEXT_PUBLIC_DEALER_PORTAL_URL ||
+    process.env.DEALER_PORTAL_URL ||
+    "http://localhost:7000"
+  ).replace(/\/$/, "")
 }
 
 function parseDeliveryMethod(value: FormDataEntryValue | null): DeliveryMethod {
@@ -376,6 +403,89 @@ export async function loginAction(
   }
 
   redirect("/dashboard")
+}
+
+export async function requestDealerPasswordResetAction(
+  _state: PasswordResetState,
+  formData: FormData
+): Promise<PasswordResetState> {
+  const email = String(formData.get("email") || "").trim().toLowerCase()
+
+  if (!email) {
+    return {
+      success: false,
+      error: "Email is required.",
+    }
+  }
+
+  try {
+    const origin = await getDealerPortalOrigin()
+
+    await sdk.auth.resetPassword("customer", "emailpass", {
+      identifier: email,
+      metadata: {
+        reset_url: `${origin}/reset-password`,
+        dealer_password_reset: true,
+      },
+    })
+  } catch {
+    // Do not reveal whether the email exists or is approved as a dealer.
+  }
+
+  return {
+    success: true,
+    email,
+  }
+}
+
+export async function resetDealerPasswordAction(
+  _state: PasswordResetState,
+  formData: FormData
+): Promise<PasswordResetState> {
+  const token = String(formData.get("token") || "")
+  const password = String(formData.get("password") || "")
+  const confirmPassword = String(formData.get("confirm_password") || "")
+
+  if (!token) {
+    return {
+      success: false,
+      error: "Reset link is missing or invalid.",
+    }
+  }
+
+  if (password.length < 8) {
+    return {
+      success: false,
+      error: "Password must be at least 8 characters.",
+    }
+  }
+
+  if (password !== confirmPassword) {
+    return {
+      success: false,
+      error: "Passwords do not match.",
+    }
+  }
+
+  try {
+    await sdk.auth.updateProvider(
+      "customer",
+      "emailpass",
+      {
+        password,
+      },
+      token
+    )
+  } catch {
+    return {
+      success: false,
+      error: "Reset link is invalid or expired. Please request a new link.",
+    }
+  }
+
+  return {
+    success: true,
+  }
 }
 
 export async function signOutAction() {
