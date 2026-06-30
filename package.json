@@ -1,0 +1,29 @@
+{
+  "name": "aozoom-dealer",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Aozoom USA standalone dealer portal.",
+  "scripts": {
+    "dev": "next dev --turbopack -p 7000",
+    "build": "next build",
+    "start": "next start -p 7000",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@medusajs/js-sdk": "latest",
+    "@medusajs/types": "latest",
+    "lucide-react": "^0.563.0",
+    "next": "15.3.9",
+    "react": "19.0.4",
+    "react-dom": "19.0.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.11",
+    "@types/react": "19.0.3",
+    "@types/react-dom": "19.0.3",
+    "eslint": "8.57.0",
+    "eslint-config-next": "15.0.8",
+    "typescript": "^5.3.2"
+  },
+  "packageManager": "yarn@4.12.0"
+}
