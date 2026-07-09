@@ -514,6 +514,8 @@ async function getOrCreateCart() {
       region_id: region.id,
       metadata: {
         channel: "dealer_portal",
+        dealer_checkout: true,
+        dealer_tax_exempt: true,
       },
     },
     {},
@@ -649,6 +651,7 @@ export async function submitDealerCheckoutAction(
         ...((cart.metadata as Record<string, unknown> | null) ?? {}),
         channel: "dealer_portal",
         dealer_checkout: true,
+        dealer_tax_exempt: true,
         dealer_delivery_method: deliveryMethod,
         dealer_payment_timing: paymentTiming,
         dealer_checkout_note: note || null,

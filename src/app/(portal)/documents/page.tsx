@@ -34,7 +34,7 @@ export default function DocumentsPage() {
       <SectionHeader
         eyebrow="Dealer Resources"
         title="Documents"
-        description="Phase 1 keeps this as a clean resource center. Files can later come from Medusa metadata, S3/R2, or a CMS."
+        // description="Phase 1 keeps this as a clean resource center. Files can later come from Medusa metadata, S3/R2, or a CMS."
       />
       <div className="grid cards-3">
         {documents.map((item) => {

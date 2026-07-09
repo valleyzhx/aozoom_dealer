@@ -264,7 +264,7 @@ export default async function CheckoutPage({
             </div>
             <div>
               <span>Tax</span>
-              <strong>{formatMoney(cart.tax_total, currencyCode)}</strong>
+              <strong>Tax Exempt</strong>
             </div>
             <div className="summary-total">
               <span>Total</span>
